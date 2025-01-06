@@ -1,0 +1,10 @@
+This consists of the various models that have been used for Ground water level prediction and their significances:
+
+Artificial Neural Networks have been adopted by many researchers for ground water prediction, but the drawback of it is that the model can be easily overfitted 
+
+SVM was also used for groundwater prediction in a later period of time 
+
+Genetic Programming was also used by some for predicting the ground water levels 
+
+ELM's were also used and they are mainly known for their easier training speeds and they are mainly known since they are easier to train since they oonly contain a single hidden layer 
+

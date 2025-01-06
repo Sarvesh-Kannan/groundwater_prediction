@@ -1,0 +1,30 @@
+Data to be collected : 
+
+Hisorical Ground Water Levels 
+
+Rainfall Data 
+
+Water Extraction data 
+
+Ground Water Recharge from lakes, rivers and desalination all inclusive with respect to the other water plants 
+
+Temperature 
+
+Drought and Flood Index [Drought and flood data]
+
+Ground Water Recharge data 
+
+Sea Water Intrusion Levels 
+
+River Flow Data 
+
+Evaporation 
+
+Population Density and Growth 
+
+Infrastructure Data - the water pipelines and other underground water routes 
+
+Soil Type and Permeability 
+
+Land Use data 
+
