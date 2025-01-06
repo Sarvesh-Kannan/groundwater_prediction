@@ -3,7 +3,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM, Dropout
+from tensorflow.keras.layers import Dense, LSTM, Dropout, BatchNormalization, Bidirectional
+from tensorflow.keras.callbacks import ReduceLROnPlateau, EarlyStopping
 
 # Load and preprocess the dataset
 file_path = r'area_cum.xlsx'
@@ -34,22 +35,50 @@ X_test_scaled = X_test_scaled.reshape((X_test_scaled.shape[0], X_test_scaled.sha
 
 # Build the LSTM model
 model = Sequential([
-    LSTM(64, activation='tanh', return_sequences=True, input_shape=(X_train_scaled.shape[1], 1)),
-    Dropout(0.2),
+    Bidirectional(LSTM(128, activation='tanh', return_sequences=True, input_shape=(X_train_scaled.shape[1], 1))),
+    BatchNormalization(),
+    Dropout(0.3),
+    Bidirectional(LSTM(64, activation='tanh', return_sequences=True)),
+    BatchNormalization(),
+    Dropout(0.3),
     LSTM(32, activation='tanh'),
-    Dropout(0.2),
-    Dense(16, activation='relu'),
+    BatchNormalization(),
+    Dropout(0.3),
+    Dense(32, activation='relu', kernel_regularizer=tf.keras.regularizers.l2(0.01)),
     Dense(1)
 ])
 
 # Compile the model
-model.compile(optimizer='adam', loss='mse', metrics=['mae'])
+optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
+model.compile(optimizer=optimizer, loss='mse', metrics=['mae'])
+
+# Callbacks for better training
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-6, verbose=1)
+early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True, verbose=1)
 
 # Train the model
-history = model.fit(X_train_scaled, y_train, epochs=50, batch_size=8, validation_split=0.2, verbose=1)
+history = model.fit(
+    X_train_scaled, y_train, 
+    epochs=200, 
+    batch_size=16, 
+    validation_split=0.2, 
+    verbose=1, 
+    callbacks=[reduce_lr, early_stopping]
+)
 
 # Evaluate the model
 test_loss, test_mae = model.evaluate(X_test_scaled, y_test, verbose=0)
 
 print(f"Test Loss: {test_loss}")
 print(f"Test MAE: {test_mae}")
+
+# Make predictions
+predictions = model.predict(X_test_scaled)
+
+# Rescale predictions and actual values back to original scale
+predictions_rescaled = predictions.flatten()
+actuals_rescaled = y_test.values
+
+# Display predictions and actuals
+for i in range(len(predictions_rescaled)):
+    print(f"Predicted: {predictions_rescaled[i]:.2f}, Actual: {actuals_rescaled[i]:.2f}")
